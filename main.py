@@ -75,7 +75,7 @@ def countNeighbors(i_c,j_c):
     res = 0
     for x in [-1,0,1]:
         for y in [-1,0,1]:
-            if 0 <= i_c+x < height and 0 <= j_c+y < length: # In boundaries
+            if 0 <= i_c+x < height and 0 <= j_c+y < length and (x,y) != (0,0): # In boundaries, excludes itself
                 if cells[i_c+x][j_c+y] == '1':
                     res += 1
     return res
