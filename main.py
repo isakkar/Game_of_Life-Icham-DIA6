@@ -12,9 +12,9 @@ from pynput.keyboard import Key
 import copy
 
 # Define variables
-length = 10
-height = 10
-cells = []
+length = int(input("Enter grid width: "))
+height = int(input("Enter grid height: "))
+cells = [['0' for _ in range(length)] for _ in range(height)]
 for i in range(height):
     cells.append(['0' for _ in range(length)])
 cur_i = 0
