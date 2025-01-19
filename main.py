@@ -8,52 +8,55 @@ Created on Mon Jan 13 15:34:18 2025
 import time
 import os
 from pynput import keyboard
-from pynput.keyboard import Key
+from pynput.keyboard import Key, KeyCode
 import copy
 
-# Define variables
-length = int(input("Enter grid width: "))
-height = int(input("Enter grid height: "))
+# Function to initialize the game state
+def initialize_game():
+    global length, height, dead_cell, alive_cell, cells, cur_i, cur_j, starting
 
-# Custom dead and alive cells
-dead_cell = input("Enter the character for dead cells (default 0): ") or '0'
-alive_cell = input("Enter the character for alive cells (default 1): ") or '1'
+    # Define variables
+    length = int(input("Enter grid width: "))
+    height = int(input("Enter grid height: "))
 
-cells = [[dead_cell for _ in range(length)] for _ in range(height)]
-cur_i = 0
-cur_j = 0
-starting = True
+    # Custom dead and alive cells
+    dead_cell = input("Enter the character for dead cells (default 0): ") or '0'
+    alive_cell = input("Enter the character for alive cells (default 1): ") or '1'
+
+    cells = [[dead_cell for _ in range(length)] for _ in range(height)]
+    cur_i = 0
+    cur_j = 0
+    starting = True
+
+initialize_game()
+
 born = [False, False, False, True, True, False, False, False, False]  # Mask defining when a cell is born
 surv = [False, False, False, True, True, False, False, False, False]  # Mask defining when a cell survives
-    
+
 # Function to display the grid in the terminal
 def display_grid():
-    os.system('cls')
+    os.system('cls' if os.name == 'nt' else 'clear')  # Clear console
     for i in range(height):
         for j in range(length):
             if starting and cur_i == i and cur_j == j:
-                print('#',end='')
+                print('#', end='')
             else:
-                print(cells[i][j],end='')
+                print(cells[i][j], end='')
         print()
 
 # Function to read key presses
 def on_press(key):
-    global cur_i,cur_j,starting
-    
+    global cur_i, cur_j, starting, cells
+
     # Move cursor
-    if key == Key.up:
-        if cur_i > 0:
-            cur_i -= 1
-    if key == Key.down:
-        if cur_i < height-1:
-            cur_i += 1
-    if key == Key.left:
-        if cur_j > 0:
-            cur_j -= 1
-    if key == Key.right:
-        if cur_j < length-1:
-            cur_j += 1
+    if key == Key.up and cur_i > 0:
+        cur_i -= 1
+    if key == Key.down and cur_i < height - 1:
+        cur_i += 1
+    if key == Key.left and cur_j > 0:
+        cur_j -= 1
+    if key == Key.right and cur_j < length - 1:
+        cur_j += 1
     # Change cell to alive / dead
     if key == Key.space:
         if cells[cur_i][cur_j] == dead_cell:
@@ -65,6 +68,12 @@ def on_press(key):
         starting = False
         listener.stop()
     
+    # Restart game
+    if key == KeyCode(char='r'):
+        print("\nRestarting simulation...")
+        initialize_game()
+        display_grid()
+
     # Exit program entirely
     if key == keyboard.Key.esc:
         exit()
@@ -74,12 +83,12 @@ def on_press(key):
         display_grid()
 
 # Function to get the number of alive neighbors of a cell given its coordinates
-def countNeighbors(i_c,j_c):
+def countNeighbors(i_c, j_c):
     res = 0
-    for x in [-1,0,1]:
-        for y in [-1,0,1]:
-            if 0 <= i_c+x < height and 0 <= j_c+y < length and (x,y) != (0,0): # In boundaries, excludes itself
-                if cells[i_c+x][j_c+y] == alive_cell:
+    for x in [-1, 0, 1]:
+        for y in [-1, 0, 1]:
+            if 0 <= i_c + x < height and 0 <= j_c + y < length and (x, y) != (0, 0):  # In boundaries, excludes itself
+                if cells[i_c + x][j_c + y] == alive_cell:
                     res += 1
     return res
 
@@ -100,7 +109,7 @@ def next_gen(gen):
                 else:
                     new_gen[i_c][j_c] = dead_cell
     return new_gen
-  
+
 # Add the starting cells
 display_grid()
 with keyboard.Listener(on_press=on_press) as listener:
