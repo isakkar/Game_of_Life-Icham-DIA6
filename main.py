@@ -14,14 +14,17 @@ import copy
 # Define variables
 length = int(input("Enter grid width: "))
 height = int(input("Enter grid height: "))
-cells = [['0' for _ in range(length)] for _ in range(height)]
-for i in range(height):
-    cells.append(['0' for _ in range(length)])
+
+# Custom dead and alive cells
+dead_cell = input("Enter the character for dead cells (default 0): ") or '0'
+alive_cell = input("Enter the character for alive cells (default 1): ") or '1'
+
+cells = [[dead_cell for _ in range(length)] for _ in range(height)]
 cur_i = 0
 cur_j = 0
 starting = True
-born = [False,False,False,True,True,False,False,False,False] # Mask defining when a cell is born
-surv = [False,False,False,True,True,False,False,False,False] # Mask defining when a cell survives
+born = [False, False, False, True, True, False, False, False, False]  # Mask defining when a cell is born
+surv = [False, False, False, True, True, False, False, False, False]  # Mask defining when a cell survives
     
 # Function to display the grid in the terminal
 def display_grid():
@@ -53,10 +56,10 @@ def on_press(key):
             cur_j += 1
     # Change cell to alive / dead
     if key == Key.space:
-        if cells[cur_i][cur_j] == '0':
-            cells[cur_i][cur_j] = '1'
+        if cells[cur_i][cur_j] == dead_cell:
+            cells[cur_i][cur_j] = alive_cell
         else:
-            cells[cur_i][cur_j] = '0'
+            cells[cur_i][cur_j] = dead_cell
     # End starting phase
     if key == Key.enter:
         starting = False
@@ -76,7 +79,7 @@ def countNeighbors(i_c,j_c):
     for x in [-1,0,1]:
         for y in [-1,0,1]:
             if 0 <= i_c+x < height and 0 <= j_c+y < length and (x,y) != (0,0): # In boundaries, excludes itself
-                if cells[i_c+x][j_c+y] == '1':
+                if cells[i_c+x][j_c+y] == alive_cell:
                     res += 1
     return res
 
@@ -86,16 +89,16 @@ def next_gen(gen):
     for i_c in range(height):
         for j_c in range(length):
             n = countNeighbors(i_c, j_c)
-            if gen[i_c][j_c] == '1':
+            if gen[i_c][j_c] == alive_cell:
                 if surv[n]:
-                    new_gen[i_c][j_c] = '1'
+                    new_gen[i_c][j_c] = alive_cell
                 else:
-                    new_gen[i_c][j_c] = '0'
+                    new_gen[i_c][j_c] = dead_cell
             else:
                 if born[n]:
-                    new_gen[i_c][j_c] = '1'
+                    new_gen[i_c][j_c] = alive_cell
                 else:
-                    new_gen[i_c][j_c] = '0'
+                    new_gen[i_c][j_c] = dead_cell
     return new_gen
   
 # Add the starting cells
